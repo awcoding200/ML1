@@ -66,39 +66,27 @@ def fisher(X1,X2):
     #####
     
 def objective(X1,X2,w):
-    ##### Replace by your code
-    # Compute the mean vectors
-    # 确保 w 是二维列向量
-    w = numpy.asarray(w).reshape(-1, 1)  # 形状为 (n_features, 1)
+    m1 = numpy.mean(X1, axis=0).reshape(-1, 1)
+    m2 = numpy.mean(X2, axis=0).reshape(-1, 1)
+    print(f'm1 shape = {m1.shape}')
+    print(f'm2 shape = {m2.shape}')
+
+    w = w.reshape(-1, 1)
+    print(f'w shape = {w.shape}')
+    m1_proj = numpy.dot(w.T, m1)
+    m2_proj = numpy.dot(w.T, m2)
     
-    # 计算每个类别的均值向量，并转换为列向量
-    m1 = numpy.mean(X1, axis=0).reshape(-1, 1)  # 形状为 (n_features, 1)
-    m2 = numpy.mean(X2, axis=0).reshape(-1, 1)  # 形状为 (n_features, 1)
+    # Compute the scatter (variance) of each projected class
+    s1_sq = numpy.sum((X1 @ w - m1_proj) ** 2)
+    s2_sq = numpy.sum((X2 @ w - m2_proj) ** 2)
     
-    # 计算 Sb = (m1 - m2) (m1 - m2)^T
-    mean_diff = m1 - m2  # 形状为 (n_features, 1)
-    Sb = numpy.matmul(mean_diff, mean_diff.T)  # 形状为 (n_features, n_features)
+    # Compute the objective function
+    J = (m1_proj - m2_proj) ** 2 / (s1_sq + s2_sq)
     
-    # 计算类内散布矩阵 S_w
-    S1 = numpy.cov(X1, rowvar=False)  # 形状为 (n_features, n_features)
-    S2 = numpy.cov(X2, rowvar=False)  # 形状为 (n_features, n_features)
-    S_w = S1 + S2  # 形状为 (n_features, n_features)
+    # keep only the 5th decimal digit
+    return numpy.round(J[0, 0], 5)
+    ####
     
-    # 计算分子: w^T Sb w
-    temp1 = numpy.matmul(w.T, Sb)        # 形状为 (1, n_features)
-    numerator = numpy.matmul(temp1, w)[0][0]  # 标量
-    
-    # 计算分母: w^T S_w w
-    temp2 = numpy.matmul(w.T, S_w)       # 形状为 (1, n_features)
-    denominator = numpy.matmul(temp2, w)[0][0]  # 标量
-    
-    # 防止分母为零
-    if denominator == 0:
-        return numpy.inf
-    
-    J = numerator / denominator
-    return J
-    #####
     
 def expand(X):
     ##### Replace by your code
